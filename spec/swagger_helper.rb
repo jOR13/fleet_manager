@@ -13,7 +13,7 @@ RSpec.configure do |config|
         version: 'v1',
         description: 'API for managing vehicles and maintenance services',
         contact: {
-          name: 'Fleet Manager Team',
+          name: 'Fleet Manager Team'
         }
       },
       paths: {},
