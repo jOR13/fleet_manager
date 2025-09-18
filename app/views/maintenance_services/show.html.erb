@@ -1,0 +1,183 @@
+<% content_for :title, "#{translate_service_type(@maintenance_service.service_type)} - #{@maintenance_service.service_date.strftime('%d/%m/%Y')}" %>
+
+<section class="section">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+      <ul>
+        <li><%= link_to t('nav.vehicles'), vehicles_path(locale: I18n.locale) %></li>
+        <li><%= link_to @maintenance_service.vehicle.plate, vehicle_path(@maintenance_service.vehicle) %></li>
+        <li><%= link_to t('nav.services'), vehicle_maintenance_services_path(@maintenance_service.vehicle, locale: I18n.locale) %></li>
+        <li class="is-active"><a href="#" aria-current="page"><%= translate_service_type(@maintenance_service.service_type) %></a></li>
+      </ul>
+    </nav>
+
+    <div class="columns">
+      <div class="column is-two-thirds">
+        <div class="card">
+          <header class="card-header">
+            <h1 class="card-header-title">
+              <span class="icon">
+                <i class="fas fa-tools"></i>
+              </span>
+              <%= translate_service_type(@maintenance_service.service_type) %>
+            </h1>
+            <div class="card-header-icon">
+              <span class="tag <%= service_type_color(@maintenance_service.service_type) %>">
+                <%= @maintenance_service.service_date.strftime("%d/%m/%Y") %>
+              </span>
+            </div>
+          </header>
+
+          <div class="card-content">
+            <div class="content">
+              <h2 class="title is-5"><%= t('common.vehicle_information') %></h2>
+              <div class="columns">
+                <div class="column">
+                  <table class="table is-narrow">
+                    <tbody>
+                      <tr>
+                        <td><strong>Vehículo:</strong></td>
+                        <td>
+                          <%= link_to vehicle_path(@maintenance_service.vehicle) do %>
+                            <%= @maintenance_service.vehicle.brand %> <%= @maintenance_service.vehicle.model %>
+                          <% end %>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Placa:</strong></td>
+                        <td><%= @maintenance_service.vehicle.plate %></td>
+                      </tr>
+                      <tr>
+                        <td><strong>Año:</strong></td>
+                        <td><%= @maintenance_service.vehicle.year %></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <hr>
+
+              <h2 class="title is-5"><%= t('common.service_details') %></h2>
+              <div class="columns">
+                <div class="column">
+                  <table class="table is-narrow is-fullwidth">
+                    <tbody>
+                      <tr>
+                        <td><strong>Fecha:</strong></td>
+                        <td>
+                          <time datetime="<%= @maintenance_service.service_date.iso8601 %>">
+                            <%= @maintenance_service.service_date.strftime("%A, %d de %B de %Y") %>
+                          </time>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong>Tipo:</strong></td>
+                        <td>
+                          <span class="tag <%= service_type_color(@maintenance_service.service_type) %>">
+                            <%= translate_service_type(@maintenance_service.service_type) %>
+                          </span>
+                        </td>
+                      </tr>
+                      <% if @maintenance_service.cost %>
+                        <tr>
+                          <td><strong>Costo:</strong></td>
+                          <td class="has-text-weight-semibold">
+                            $<%= number_with_delimiter(@maintenance_service.cost.to_i) %>
+                          </td>
+                        </tr>
+                      <% end %>
+                      <% if @maintenance_service.mileage_at_service %>
+                        <tr>
+                          <td><strong>Kilometraje:</strong></td>
+                          <td><%= number_with_delimiter(@maintenance_service.mileage_at_service) %> km</td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <% if @maintenance_service.description.present? %>
+                <hr>
+                <h2 class="title is-5"><%= t('common.description') %></h2>
+                <div class="box">
+                  <p class="content"><%= simple_format(@maintenance_service.description) %></p>
+                </div>
+              <% end %>
+
+              <% if @maintenance_service.notes.present? %>
+                <hr>
+                <h2 class="title is-5"><%= t('common.additional_notes') %></h2>
+                <div class="notification is-light">
+                  <p><%= simple_format(@maintenance_service.notes) %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <footer class="card-footer">
+            <%= link_to t('buttons.edit'), edit_maintenance_service_path(@maintenance_service, locale: I18n.locale),
+                       class: "card-footer-item button is-warning" %>
+            <%= link_to t('buttons.delete'), maintenance_service_path(@maintenance_service, locale: I18n.locale),
+                       data: {
+                         turbo_method: :delete,
+                         turbo_confirm: t('common.confirm_delete_service')
+                       },
+                       class: "card-footer-item button is-danger" %>
+          </footer>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="card">
+          <header class="card-header">
+            <p class="card-header-title"><%= t('common.related_information') %></p>
+          </header>
+          <div class="card-content">
+            <div class="content">
+              <h3 class="title is-6"><%= t('common.recent_services') %></h3>
+              <% recent_services = @maintenance_service.vehicle.maintenance_services
+                                                       .where.not(id: @maintenance_service.id)
+                                                       .order(service_date: :desc)
+                                                       .limit(3) %>
+              <% if recent_services.any? %>
+                <% recent_services.each do |service| %>
+                  <div class="box is-small">
+                    <p class="is-size-7">
+                      <strong><%= translate_service_type(service.service_type) %></strong><br>
+                      <%= service.service_date.strftime("%d/%m/%Y") %>
+                    </p>
+                  </div>
+                <% end %>
+                <p class="is-size-7">
+                  <%= link_to t('common.view_all_services'),
+                             vehicle_maintenance_services_path(@maintenance_service.vehicle),
+                             class: "has-text-primary" %>
+                </p>
+              <% else %>
+                <p class="is-size-7 has-text-grey">No hay servicios anteriores</p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <header class="card-header">
+            <p class="card-header-title"><%= t('common.quick_actions') %></p>
+          </header>
+          <div class="card-content">
+            <div class="buttons">
+              <%= link_to t('common.new_service'),
+                         new_vehicle_maintenance_service_path(@maintenance_service.vehicle),
+                         class: "button is-primary is-fullwidth is-small" %>
+              <%= link_to t('common.view_vehicle'),
+                         vehicle_path(@maintenance_service.vehicle),
+                         class: "button is-info is-fullwidth is-small" %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

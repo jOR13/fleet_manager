@@ -1,0 +1,50 @@
+<% content_for :title, "Editar Servicio - #{translate_service_type(@maintenance_service.service_type)}" %>
+
+<section class="section">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+      <ul>
+        <li><%= link_to t('nav.vehicles'), vehicles_path(locale: I18n.locale) %></li>
+        <li><%= link_to @maintenance_service.vehicle.plate, vehicle_path(@maintenance_service.vehicle) %></li>
+        <li><%= link_to t('nav.services'), vehicle_maintenance_services_path(@maintenance_service.vehicle, locale: I18n.locale) %></li>
+        <li class="is-active"><a href="#" aria-current="page"><%= t('buttons.edit') %></a></li>
+      </ul>
+    </nav>
+
+    <div class="columns is-centered">
+      <div class="column is-two-thirds">
+        <div class="card">
+          <header class="card-header">
+            <h1 class="card-header-title title is-4">
+              <%= t('common.edit_maintenance_service') %>
+            </h1>
+          </header>
+          <div class="card-content">
+            <div class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <span class="icon is-large has-text-warning">
+                    <i class="fas fa-edit fa-2x"></i>
+                  </span>
+                </figure>
+              </div>
+              <div class="media-content">
+                <p class="title is-5">
+                  <%= @maintenance_service.vehicle.brand %> <%= @maintenance_service.vehicle.model %>
+                </p>
+                <p class="subtitle is-6">
+                  <%= translate_service_type(@maintenance_service.service_type) %> -
+                  <%= @maintenance_service.service_date.strftime("%d/%m/%Y") %>
+                </p>
+              </div>
+            </div>
+
+            <hr>
+
+            <%= render 'form', maintenance_service: @maintenance_service %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

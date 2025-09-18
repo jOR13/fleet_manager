@@ -1,0 +1,18 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: numaris_challenge_development
+
+test:
+  <<: *default
+  database: numaris_challenge_test
+
+production:
+  <<: *default
+  database: numaris_challenge_production
+  username: numaris_challenge
+  password: <%= ENV["NUMARIS_CHALLENGE_DATABASE_PASSWORD"] %>

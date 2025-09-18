@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: numaris_challenge_development
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres:password@db:5432/numaris_challenge_development
+      RAILS_ENV: development
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - gem_cache:/usr/local/bundle
+    stdin_open: true
+    tty: true
+
+  test:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://postgres:password@db:5432/numaris_challenge_test
+      RAILS_ENV: test
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - gem_cache:/usr/local/bundle
+    command: ["bundle", "exec", "rspec"]
+    profiles:
+      - test
+
+volumes:
+  postgres_data:
+  gem_cache:

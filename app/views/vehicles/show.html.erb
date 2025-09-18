@@ -1,0 +1,162 @@
+<% content_for :title, "#{@vehicle.brand} #{@vehicle.model}" %>
+
+<section class="section">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+      <ul>
+        <li><%= link_to t('nav.vehicles'), vehicles_path %></li>
+        <li class="is-active"><a href="#" aria-current="page"><%= @vehicle.plate %></a></li>
+      </ul>
+    </nav>
+
+    <div class="columns">
+      <div class="column is-two-thirds">
+        <div class="card">
+          <div class="card-content">
+            <div class="media">
+              <div class="media-left">
+                <figure class="image is-64x64">
+                  <span class="icon is-large has-text-primary">
+                    <i class="fas fa-car fa-3x"></i>
+                  </span>
+                </figure>
+              </div>
+              <div class="media-content">
+                <p class="title is-2"><%= @vehicle.brand %> <%=@vehicle.model %></p>
+                <p class="subtitle is-4"><%= @vehicle.plate %></p>
+              </div>
+            </div>
+
+            <div class="content">
+              <div class="columns">
+                <div class="column">
+                  <h3 class="title is-5"><%= t('vehicles.form.general_info', default: 'Información General') %></h3>
+                  <table class="table is-fullwidth">
+                    <tbody>
+                      <tr>
+                        <td><strong><%= t('vehicles.fields.vin') %></strong></td>
+                        <td><%= @vehicle.vin %></td>
+                      </tr>
+                      <tr>
+                        <td><strong><%= t('vehicles.fields.year') %></strong></td>
+                        <td><%= @vehicle.year %></td>
+                      </tr>
+                      <% if @vehicle.mileage %>
+                        <tr>
+                          <td><strong><%= t('vehicles.fields.mileage') %></strong></td>
+                          <td><%= number_with_delimiter(@vehicle.mileage) %> km</td>
+                        </tr>
+                      <% end %>
+                      <tr>
+                        <td><strong><%= t('vehicles.fields.services') %></strong></td>
+                        <td>
+                          <span class="tag is-info">
+                            <%= @vehicle.maintenance_services.count %> <%= t('vehicles.fields.services').downcase %>
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <footer class="card-footer">
+            <%= link_to t('buttons.edit'), edit_vehicle_path(@vehicle), class: "card-footer-item button is-warning" %>
+            <%= link_to t('buttons.delete'), vehicle_path(@vehicle),
+                       data: {
+                         turbo_method: :delete,
+                         turbo_confirm: t('vehicles.confirm_delete')
+                       },
+                       class: "card-footer-item button is-danger" %>
+          </footer>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="card">
+          <header class="card-header">
+            <p class="card-header-title"><%= t('vehicles.quick_actions', default: 'Acciones Rápidas') %></p>
+          </header>
+          <div class="card-content">
+            <div class="buttons">
+              <%= link_to t('maintenance_services.new'), new_vehicle_maintenance_service_path(@vehicle),
+                         class: "button is-primary is-fullwidth" %>
+              <%= link_to t('vehicles.view_history', default: 'Ver Historial'), vehicle_maintenance_services_path(@vehicle),
+                         class: "button is-info is-fullwidth" %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <h3 class="title is-4"><%= t('maintenance_services.recent', default: 'Servicios de Mantenimiento Recientes') %></h3>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <%= link_to t('buttons.view_all', default: 'Ver todos'), vehicle_maintenance_services_path(@vehicle),
+                       class: "button is-small is-outlined" %>
+          </div>
+        </div>
+      </div>
+
+      <% recent_services = @vehicle.maintenance_services.order(service_date: :desc).limit(5) %>
+      <% if recent_services.any? %>
+        <div class="table-container">
+          <table class="table is-fullwidth is-striped">
+            <thead>
+              <tr>
+                <th><%= t('maintenance_services.fields.date') %></th>
+                <th><%= t('maintenance_services.fields.type') %></th>
+                <th><%= t('maintenance_services.fields.description') %></th>
+                <th><%= t('maintenance_services.fields.cost') %></th>
+                <th><%= t('maintenance_services.fields.actions') %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recent_services.each do |service| %>
+                <tr>
+                  <td><%= l(service.service_date, format: :default) %></td>
+                  <td>
+                    <span class="tag is-success">
+                      <%= translate_service_type(service.service_type) %>
+                    </span>
+                  </td>
+                  <td><%= truncate(service.description, length: 50) %></td>
+                  <td>
+                    <% if service.cost %>
+                      $<%= number_with_delimiter(service.cost.to_i) %>
+                    <% else %>
+                      <span class="has-text-grey"><%= t('maintenance_services.messages.not_specified') %></span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div class="buttons are-small">
+                      <%= link_to t('buttons.view'), maintenance_service_path(service),
+                                 class: "button is-small is-info" %>
+                      <%= link_to t('buttons.edit'), edit_maintenance_service_path(service),
+                                 class: "button is-small is-warning" %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="notification is-success">
+          <p class="has-text-centered">
+            <%= t('maintenance_services.messages.no_services') %>
+            <%= link_to t('maintenance_services.messages.register_first'), new_vehicle_maintenance_service_path(@vehicle),
+                       class: "has-text-weight-bold" %>
+          </p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>

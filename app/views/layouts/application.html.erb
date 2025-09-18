@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html data-theme="light">
+  <head>
+    <title><%= content_for(:title) || t('app.title') %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+
+    <style>
+      [data-theme="dark"] {
+        background-color: #121212;
+        color: #e0e0e0;
+      }
+
+      [data-theme="dark"] .navbar.is-primary {
+        background-color: #1e1e1e !important;
+      }
+
+      [data-theme="dark"] .navbar-item {
+        color: #e0e0e0 !important;
+      }
+
+      [data-theme="dark"] .box,
+      [data-theme="dark"] .card {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+      }
+
+      [data-theme="dark"] .table {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+      }
+
+      [data-theme="dark"] .table th {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+      }
+
+      [data-theme="dark"] .table tr:hover {
+        background-color: #3d3d3d;
+      }
+
+      [data-theme="dark"] .input,
+      [data-theme="dark"] .textarea,
+      [data-theme="dark"] .select select {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #4d4d4d;
+      }
+
+      [data-theme="dark"] .footer {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+      }
+
+      [data-theme="dark"] .notification.is-info {
+        background-color: #2d4a6d;
+        color: #e0e0e0;
+      }
+
+      [data-theme="dark"] .section {
+        background-color: #121212;
+      }
+
+      .theme-toggle {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body data-controller="theme">
+    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="<%= vehicles_path %>">
+          <strong>🚗 <%= t('app.title') %></strong>
+        </a>
+
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item" href="<%= vehicles_path %>">
+            <%= t('nav.vehicles') %>
+          </a>
+          <a class="navbar-item" href="<%= reports_path %>">
+            <%= t('nav.reports') %>
+          </a>
+          <a class="navbar-item" href="/api-docs" target="_blank">
+            <%= t('nav.api_docs') %>
+          </a>
+        </div>
+
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons">
+              <div class="dropdown is-hoverable">
+                <div class="dropdown-trigger">
+                  <button class="button is-light" aria-haspopup="true" aria-controls="dropdown-menu">
+                    <span class="icon">
+                      <i class="fas fa-globe"></i>
+                    </span>
+                    <span><%= I18n.locale.to_s.upcase %></span>
+                    <span class="icon is-small">
+                      <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    </span>
+                  </button>
+                </div>
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                  <div class="dropdown-content">
+                    <%= link_to url_for(locale: :es), class: "dropdown-item #{'is-active' if I18n.locale == :es}" do %>
+                      <span class="icon"><i class="fas fa-flag"></i></span>
+                      <span>Español</span>
+                    <% end %>
+                    <%= link_to url_for(locale: :en), class: "dropdown-item #{'is-active' if I18n.locale == :en}" do %>
+                      <span class="icon"><i class="fas fa-flag"></i></span>
+                      <span>English</span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              <button class="button is-light theme-toggle"
+                      data-action="click->theme#toggle"
+                      data-theme-target="toggleButton">
+                <span class="icon">
+                  <i class="fas fa-moon" data-theme-target="icon"></i>
+                </span>
+                <span data-theme-target="text"><%= t('nav.dark_mode') %></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main role="main">
+      <% if notice %>
+        <div class="notification is-success is-light">
+          <button class="delete"></button>
+          <%= notice %>
+        </div>
+      <% end %>
+
+      <% if alert %>
+        <div class="notification is-danger is-light">
+          <button class="delete"></button>
+          <%= alert %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          <strong><%= t('app.title') %></strong> - <%= t('app.subtitle') %>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+<% content_for :title, "#{t('vehicles.edit')} #{@vehicle.brand} #{@vehicle.model}" %>
+
+<section class="section">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+      <ul>
+        <li><%= link_to t('nav.vehicles'), vehicles_path %></li>
+        <li><%= link_to @vehicle.plate, vehicle_path(@vehicle) %></li>
+        <li class="is-active"><a href="#" aria-current="page"><%= t('vehicles.edit') %></a></li>
+      </ul>
+    </nav>
+
+    <div class="columns is-centered">
+      <div class="column is-half">
+        <div class="card">
+          <header class="card-header">
+            <h1 class="card-header-title title is-4">
+              <%= t('vehicles.edit') %> <%= @vehicle.brand %> <%= @vehicle.model %>
+            </h1>
+          </header>
+          <div class="card-content">
+            <%= render 'form', vehicle: @vehicle %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

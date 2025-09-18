@@ -1,0 +1,92 @@
+<%= form_with model: vehicle, local: true, data: { controller: "vehicle-form" } do |form| %>
+  <div class="field">
+    <%= form.label :vin, t('vehicles.form.vin'), class: "label" %>
+    <div class="control">
+      <%= form.text_field :vin, class: "input", required: true,
+                          maxlength: 17,
+                          placeholder: t('vehicles.form.vin_placeholder'),
+                          data: {
+                            action: "input->vehicle-form#validateField",
+                            vehicle_form_target: "vinField"
+                          } %>
+    </div>
+    <p class="help"><%= t('vehicles.form.vin_help', default: 'Número de identificación del vehículo (17 caracteres)') %></p>
+    <p class="help is-danger is-hidden" data-vehicle-form-target="vinError"></p>
+  </div>
+
+  <div class="field">
+    <%= form.label :brand, t('vehicles.form.brand'), class: "label" %>
+    <div class="control">
+      <%= form.text_field :brand, class: "input", required: true,
+                          data: {
+                            action: "input->vehicle-form#validateField",
+                            vehicle_form_target: "brandField"
+                          } %>
+    </div>
+    <p class="help is-danger is-hidden" data-vehicle-form-target="brandError"></p>
+  </div>
+
+  <div class="field">
+    <%= form.label :model, t('vehicles.form.model'), class: "label" %>
+    <div class="control">
+      <%= form.text_field :model, class: "input", required: true,
+                          data: {
+                            action: "input->vehicle-form#validateField",
+                            vehicle_form_target: "modelField"
+                          } %>
+    </div>
+    <p class="help is-danger is-hidden" data-vehicle-form-target="modelError"></p>
+  </div>
+
+  <div class="field">
+    <%= form.label :year, t('vehicles.form.year'), class: "label" %>
+    <div class="control">
+      <%= form.number_field :year, class: "input",
+                           min: 1900, max: Date.current.year + 1,
+                           required: true,
+                           data: {
+                             action: "input->vehicle-form#validateField",
+                             vehicle_form_target: "yearField"
+                           } %>
+    </div>
+    <p class="help is-danger is-hidden" data-vehicle-form-target="yearError"></p>
+  </div>
+
+  <div class="field">
+    <%= form.label :plate, t('vehicles.form.plate'), class: "label" %>
+    <div class="control">
+      <%= form.text_field :plate, class: "input", required: true,
+                          placeholder: t('vehicles.form.plate_placeholder'),
+                          data: {
+                            action: "input->vehicle-form#validateField",
+                            vehicle_form_target: "plateField"
+                          } %>
+    </div>
+    <p class="help is-danger is-hidden" data-vehicle-form-target="plateError"></p>
+  </div>
+
+  <div class="field">
+    <%= form.label :mileage, t('vehicles.form.mileage'), class: "label" %>
+    <div class="control">
+      <%= form.number_field :mileage, class: "input",
+                           min: 0, step: 1,
+                           data: {
+                             action: "input->vehicle-form#validateField",
+                             vehicle_form_target: "mileageField"
+                           } %>
+    </div>
+    <p class="help"><%= t('vehicles.form.mileage_placeholder') %></p>
+    <p class="help is-danger is-hidden" data-vehicle-form-target="mileageError"></p>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <%= form.submit class: "button is-primary",
+                      data: { vehicle_form_target: "submitButton" } %>
+    </div>
+    <div class="control">
+      <%= link_to t('buttons.cancel'), vehicle.persisted? ? vehicle_path(vehicle) : vehicles_path,
+                  class: "button is-light" %>
+    </div>
+  </div>
+<% end %>

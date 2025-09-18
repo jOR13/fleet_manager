@@ -1,0 +1,73 @@
+wb = xlsx_package.workbook
+
+wb.styles do |style|
+  title_style = style.add_style(sz: 16, b: true, alignment: { horizontal: :center })
+  header_style = style.add_style(sz: 12, b: true, bg_color: "DDDDDD")
+  date_style = style.add_style(format_code: "MM/DD/YYYY")
+  currency_style = style.add_style(format_code: "$#,##0.00")
+end
+
+wb.add_worksheet(name: "Maintenance Summary") do |sheet|
+  sheet.add_row [ "MAINTENANCE SUMMARY REPORT" ], style: title_style
+  sheet.add_row []
+
+  period_text = if @report[:period][:from] && @report[:period][:to]
+    "Period: #{@report[:period][:from]} to #{@report[:period][:to]}"
+  elsif @report[:period][:from]
+    "From: #{@report[:period][:from]}"
+  elsif @report[:period][:to]
+    "To: #{@report[:period][:to]}"
+  else
+    "Period: All Time"
+  end
+  sheet.add_row [ period_text ]
+  sheet.add_row []
+
+  sheet.add_row [ "TOTALS" ], style: header_style
+  sheet.add_row [ "Total Services", @report[:totals][:total_orders] ]
+  sheet.add_row [ "Total Cost", @report[:totals][:total_cost_dollars] ], style: [ nil, currency_style ]
+  sheet.add_row [ "Average Cost", @report[:totals][:average_cost_dollars] ], style: [ nil, currency_style ]
+  sheet.add_row []
+
+  sheet.add_row [ "SERVICES BY STATUS" ], style: header_style
+  sheet.add_row [ "Status", "Count", "Total Cost" ], style: header_style
+  @report[:by_status].each do |status_data|
+    sheet.add_row [
+      status_data[:status].humanize,
+      status_data[:count],
+      status_data[:total_cost_dollars]
+    ], style: [ nil, nil, currency_style ]
+  end
+  sheet.add_row []
+
+  sheet.add_row [ "SERVICES BY VEHICLE" ], style: header_style
+  sheet.add_row [ "Vehicle", "Plate", "VIN", "Brand", "Model", "Services", "Total Cost" ], style: header_style
+  @report[:by_vehicle].each do |vehicle_data|
+    sheet.add_row [
+      "#{vehicle_data[:vehicle][:brand]} #{vehicle_data[:vehicle][:model]}",
+      vehicle_data[:vehicle][:plate],
+      vehicle_data[:vehicle][:vin],
+      vehicle_data[:vehicle][:brand],
+      vehicle_data[:vehicle][:model],
+      vehicle_data[:total_orders],
+      vehicle_data[:total_cost_dollars]
+    ], style: [ nil, nil, nil, nil, nil, nil, currency_style ]
+  end
+  sheet.add_row []
+
+  if @report[:top_vehicles_by_cost].any?
+    sheet.add_row [ "TOP 3 VEHICLES BY COST" ], style: header_style
+    sheet.add_row [ "Rank", "Vehicle", "Plate", "Services", "Total Cost" ], style: header_style
+    @report[:top_vehicles_by_cost].each_with_index do |vehicle_data, index|
+      sheet.add_row [
+        index + 1,
+        "#{vehicle_data[:vehicle][:brand]} #{vehicle_data[:vehicle][:model]}",
+        vehicle_data[:vehicle][:plate],
+        vehicle_data[:total_orders],
+        vehicle_data[:total_cost_dollars]
+      ], style: [ nil, nil, nil, nil, currency_style ]
+    end
+  end
+
+  sheet.column_widths 20, 15, 20, 15, 15, 12, 15
+end

@@ -1,0 +1,52 @@
+<% content_for :title, "Nuevo Servicio - #{@vehicle.plate}" %>
+
+<section class="section">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+      <ul>
+        <li><%= link_to t('nav.vehicles'), vehicles_path(locale: I18n.locale) %></li>
+        <li><%= link_to @vehicle.plate, vehicle_path(@vehicle) %></li>
+        <li><%= link_to t('nav.services'), vehicle_maintenance_services_path(@vehicle, locale: I18n.locale) %></li>
+        <li class="is-active"><a href="#" aria-current="page"><%= t('common.new_service') %></a></li>
+      </ul>
+    </nav>
+
+    <div class="columns is-centered">
+      <div class="column is-two-thirds">
+        <div class="card">
+          <header class="card-header">
+            <h1 class="card-header-title title is-4">
+              <%= t('common.register_new_maintenance_service') %>
+            </h1>
+          </header>
+          <div class="card-content">
+            <div class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <span class="icon is-large has-text-primary">
+                    <i class="fas fa-tools fa-2x"></i>
+                  </span>
+                </figure>
+              </div>
+              <div class="media-content">
+                <p class="title is-5"><%= @vehicle.brand %> <%= @vehicle.model %></p>
+                <p class="subtitle is-6">
+                  <%= t('common.plate') %>: <%= @vehicle.plate %> |
+                  <% if @vehicle.mileage %>
+                    <%= t('common.current_mileage') %>: <%= number_with_delimiter(@vehicle.mileage) %> km
+                  <% else %>
+                    <%= t('common.no_mileage_recorded') %>
+                  <% end %>
+                </p>
+              </div>
+            </div>
+
+            <hr>
+
+            <%= render 'form', maintenance_service: @maintenance_service %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

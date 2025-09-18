@@ -1,0 +1,211 @@
+<div class="columns">
+  <div class="column">
+    <div class="card">
+      <div class="card-content has-text-centered">
+        <p class="title is-3"><%= @report[:totals][:total_orders] %></p>
+        <p class="subtitle"><%= t('reports.totals.total_services') %></p>
+      </div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="card">
+      <div class="card-content has-text-centered">
+        <p class="title is-3">$<%= number_with_delimiter(@report[:totals][:total_cost_dollars]) %></p>
+        <p class="subtitle"><%= t('reports.totals.total_cost') %></p>
+      </div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="card">
+      <div class="card-content has-text-centered">
+        <p class="title is-3">$<%= number_with_delimiter(@report[:totals][:average_cost_dollars]) %></p>
+        <p class="subtitle"><%= t('reports.totals.average_cost') %></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column is-half">
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title"><%= t('reports.charts.services_by_status') %></p>
+      </header>
+      <div class="card-content">
+        <canvas id="statusChart" data-reports-target="statusChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="column is-half">
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title"><%= t('reports.charts.services_by_type') %></p>
+      </header>
+      <div class="card-content">
+        <canvas id="typeChart" data-reports-target="typeChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column">
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title"><%= t('reports.charts.cost_by_vehicle') %></p>
+      </header>
+      <div class="card-content">
+        <div class="table-container" data-controller="table-sort">
+          <table class="table is-fullwidth is-striped is-hoverable" data-table-sort-target="table">
+            <thead>
+              <tr>
+                <th data-sortable data-sort-type="string"><%= t('reports.tables.vehicle') %></th>
+                <th data-sortable data-sort-type="number"><%= t('reports.tables.services_count') %></th>
+                <th data-sortable data-sort-type="number"><%= t('reports.tables.total_cost') %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @report[:by_vehicle].each do |vehicle_data| %>
+                <tr>
+                  <td>
+                    <strong><%= vehicle_data[:vehicle][:brand] %> <%= vehicle_data[:vehicle][:model] %></strong><br>
+                    <small class="has-text-grey"><%= vehicle_data[:vehicle][:plate] %></small>
+                  </td>
+                  <td data-sort-value="<%= vehicle_data[:total_orders] %>">
+                    <span class="tag is-info"><%= vehicle_data[:total_orders] %></span>
+                  </td>
+                  <td data-sort-value="<%= vehicle_data[:total_cost_dollars] %>">
+                    <strong>$<%= number_with_delimiter(vehicle_data[:total_cost_dollars]) %></strong>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @report[:top_vehicles_by_cost].any? %>
+  <div class="box">
+    <h3 class="title is-5">Top 3 <%= t('reports.tables.vehicle') %>s</h3>
+    <div class="columns">
+      <% @report[:top_vehicles_by_cost].each_with_index do |vehicle_data, index| %>
+        <div class="column">
+          <div class="card">
+            <div class="card-content has-text-centered">
+              <div class="is-size-1 has-text-weight-bold has-text-primary">#<%= index + 1 %></div>
+              <p class="title is-5">
+                <%= vehicle_data[:vehicle][:brand] %> <%= vehicle_data[:vehicle][:model] %>
+              </p>
+              <p class="subtitle is-6"><%= vehicle_data[:vehicle][:plate] %></p>
+              <p class="title is-4 has-text-success">
+                $<%= number_with_delimiter(vehicle_data[:total_cost_dollars]) %>
+              </p>
+              <p class="subtitle is-6">
+                <%= vehicle_data[:total_orders] %> <%= t('reports.tables.services_count').downcase %>
+              </p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function initializeCharts() {
+      // Destroy existing charts if they exist
+      if (window.statusChart) {
+        window.statusChart.destroy();
+      }
+      if (window.typeChart) {
+        window.typeChart.destroy();
+      }
+
+      // Services by Status Chart
+      const statusData = <%= raw @report[:by_status].to_json %>;
+      const statusLabels = statusData.map(item => {
+        const statusMap = {
+          'pending': '<%= t('maintenance_services.statuses.pending') %>',
+          'in_progress': '<%= t('maintenance_services.statuses.in_progress') %>',
+          'completed': '<%= t('maintenance_services.statuses.completed') %>'
+        };
+        return statusMap[item.status] || item.status;
+      });
+      const statusCounts = statusData.map(item => item.count);
+
+      const statusCanvas = document.getElementById('statusChart');
+      if (statusCanvas) {
+        window.statusChart = new Chart(statusCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: statusLabels,
+            datasets: [{
+              data: statusCounts,
+              backgroundColor: ['#ff3860', '#ffdd57', '#48c774']
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      }
+
+      // Services by Type Chart
+      const typeData = <%= raw @report[:by_service_type].to_json %>;
+      const typeLabels = typeData.map(item => {
+        const typeMap = {
+          'Mantenimiento Preventivo': '<%= t('maintenance_services.types.preventive_maintenance') %>',
+          'Reparación': '<%= t('maintenance_services.types.repair') %>',
+          'Inspección': '<%= t('maintenance_services.types.inspection') %>',
+          'Cambio de Aceite': '<%= t('maintenance_services.types.oil_change') %>',
+          'Otro': '<%= t('maintenance_services.types.other') %>'
+        };
+        return typeMap[item.service_type] || item.service_type;
+      });
+      const typeCounts = typeData.map(item => item.count);
+
+      const typeCanvas = document.getElementById('typeChart');
+      if (typeCanvas) {
+        window.typeChart = new Chart(typeCanvas, {
+          type: 'bar',
+          data: {
+            labels: typeLabels,
+            datasets: [{
+              label: '<%= t('reports.totals.total_services') %>',
+              data: typeCounts,
+              backgroundColor: '#3273dc'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Initialize charts immediately
+    initializeCharts();
+
+    // Re-initialize charts when turbo updates the content
+    document.addEventListener('turbo:frame-load', initializeCharts);
+  });
+</script>

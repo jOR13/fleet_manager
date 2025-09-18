@@ -1,0 +1,192 @@
+<%= form_with model: [@vehicle, maintenance_service], local: true,
+              data: { controller: "maintenance-form" } do |form| %>
+
+  <div class="columns">
+    <div class="column">
+      <div class="field">
+        <%= form.label :service_type, t('maintenance_services.form.service_type'), class: "label" %>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <%= form.select :service_type,
+                           options_for_select([
+                             [t('maintenance_services.types.preventive_maintenance'), 'Mantenimiento Preventivo'],
+                             [t('maintenance_services.types.repair'), 'Reparación'],
+                             [t('maintenance_services.types.inspection'), 'Inspección'],
+                             [t('maintenance_services.types.oil_change'), 'Cambio de Aceite'],
+                             [t('maintenance_services.types.other'), 'Otro']
+                           ], maintenance_service.service_type),
+                           { prompt: t('maintenance_services.filters.all_types') },
+                           {
+                             class: "select",
+                             required: true,
+                             data: {
+                               action: "change->maintenance-form#handleTypeChange",
+                               maintenance_form_target: "serviceTypeField"
+                             }
+                           } %>
+          </div>
+        </div>
+        <p class="help is-danger is-hidden" data-maintenance-form-target="serviceTypeError"></p>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="field">
+        <%= form.label :service_date, t('maintenance_services.form.service_date'), class: "label" %>
+        <div class="control">
+          <%= form.date_field :service_date, class: "input", required: true,
+                             value: maintenance_service.service_date,
+                             data: {
+                               action: "change->maintenance-form#validateField",
+                               maintenance_form_target: "serviceDateField"
+                             } %>
+        </div>
+        <p class="help is-danger is-hidden" data-maintenance-form-target="serviceDateError"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <%= form.label :description, t('maintenance_services.form.description'), class: "label" %>
+    <div class="control">
+      <%= form.text_area :description, class: "textarea", rows: 4,
+                         placeholder: t('maintenance_services.form.description_placeholder'),
+                         required: true,
+                         data: {
+                           action: "input->maintenance-form#validateField",
+                           maintenance_form_target: "descriptionField"
+                         } %>
+    </div>
+    <p class="help"><%= t('maintenance_services.form.description_help') %></p>
+    <p class="help is-danger is-hidden" data-maintenance-form-target="descriptionError"></p>
+  </div>
+
+  <div class="columns">
+    <div class="column">
+      <div class="field">
+        <%= form.label :cost, t('maintenance_services.form.cost'), class: "label" %>
+        <div class="control has-icons-left">
+          <%= form.number_field :cost, class: "input", step: 0.01, min: 0,
+                               placeholder: t('maintenance_services.form.cost_placeholder'),
+                               data: {
+                                 action: "input->maintenance-form#formatCurrency",
+                                 maintenance_form_target: "costField"
+                               } %>
+          <span class="icon is-small is-left">
+            <i class="fas fa-dollar-sign"></i>
+          </span>
+        </div>
+        <p class="help"><%= t('maintenance_services.form.cost_help') %></p>
+        <p class="help is-danger is-hidden" data-maintenance-form-target="costError"></p>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="field">
+        <%= form.label :mileage_at_service, t('maintenance_services.form.mileage_at_service'), class: "label" %>
+        <div class="control has-icons-right">
+          <%= form.number_field :mileage_at_service, class: "input",
+                               min: 0, step: 1,
+                               placeholder: @vehicle&.mileage || "0",
+                               data: {
+                                 action: "input->maintenance-form#validateMileage",
+                                 maintenance_form_target: "mileageField"
+                               } %>
+          <span class="icon is-small is-right">
+            <span>km</span>
+          </span>
+        </div>
+        <p class="help"><%= t('maintenance_services.form.mileage_help') %></p>
+        <p class="help is-danger is-hidden" data-maintenance-form-target="mileageError"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column">
+      <div class="field">
+        <%= form.label :status, t('maintenance_services.form.status'), class: "label" %>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <%= form.select :status,
+                           options_for_select([
+                             [t('maintenance_services.statuses.pending'), 'pending'],
+                             [t('maintenance_services.statuses.in_progress'), 'in_progress'],
+                             [t('maintenance_services.statuses.completed'), 'completed']
+                           ], maintenance_service.status),
+                           {},
+                           {
+                             class: "select",
+                             required: true
+                           } %>
+          </div>
+        </div>
+        <p class="help"><%= t('maintenance_services.form.status_help') %></p>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="field">
+        <%= form.label :priority, t('maintenance_services.form.priority'), class: "label" %>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <%= form.select :priority,
+                           options_for_select([
+                             [t('maintenance_services.priorities.low'), 'low'],
+                             [t('maintenance_services.priorities.medium'), 'medium'],
+                             [t('maintenance_services.priorities.high'), 'high']
+                           ], maintenance_service.priority),
+                           {},
+                           {
+                             class: "select",
+                             required: true
+                           } %>
+          </div>
+        </div>
+        <p class="help"><%= t('maintenance_services.form.priority_help') %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="field is-hidden" data-maintenance-form-target="additionalFields">
+    <div class="box">
+      <h5 class="title is-6"><%= t('maintenance_services.form.additional_info', default: 'Información Adicional') %></h5>
+
+      <div class="is-hidden" data-maintenance-form-target="oilChangeFields">
+        <div class="columns">
+          <div class="column">
+            <div class="field">
+              <label class="label"><%= t('maintenance_services.form.oil_type', default: 'Tipo de Aceite') %></label>
+              <div class="control">
+                <%= form.text_field :notes, class: "input",
+                                   placeholder: t('maintenance_services.form.oil_type_placeholder', default: 'Ej: 5W-30 Sintético'),
+                                   data: { maintenance_form_target: "oilTypeField" } %>
+              </div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="field">
+              <label class="label"><%= t('maintenance_services.form.next_oil_change', default: 'Próximo Cambio (km)') %></label>
+              <div class="control">
+                <input type="number" class="input"
+                       data-maintenance-form-target="nextOilChangeField"
+                       placeholder="<%= t('maintenance_services.form.next_oil_change_placeholder', default: 'Ej: 5000') %>">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <%= form.submit class: "button is-primary",
+                      data: { maintenance_form_target: "submitButton" } %>
+    </div>
+    <div class="control">
+      <%= link_to t('buttons.cancel'), @vehicle,
+                  class: "button is-light" %>
+    </div>
+  </div>
+<% end %>

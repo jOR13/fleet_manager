@@ -1,0 +1,188 @@
+<% content_for :title, "#{t('maintenance_services.title')} - #{@vehicle.plate}" %>
+
+<section class="section" data-controller="service-filter">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+      <ul>
+        <li><%= link_to t('nav.vehicles'), vehicles_path %></li>
+        <li><%= link_to @vehicle.plate, vehicle_path(@vehicle) %></li>
+        <li class="is-active"><a href="#" aria-current="page"><%= t('vehicles.fields.services') %></a></li>
+      </ul>
+    </nav>
+
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <h1 class="title">
+            <%= t('maintenance_services.title') %>
+            <span class="subtitle">- <%= @vehicle.brand %> <%= @vehicle.model %></span>
+          </h1>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <%= link_to t('maintenance_services.new'), new_vehicle_maintenance_service_path(@vehicle),
+                     class: "button is-primary" %>
+        </div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label"><%= t('maintenance_services.filters.by_type') %></label>
+            <div class="control">
+              <div class="select is-fullwidth">
+                <select data-action="change->service-filter#filterByType"
+                        data-service-filter-target="typeFilter">
+                  <option value=""><%= t('maintenance_services.filters.all_types') %></option>
+                  <option value="Mantenimiento Preventivo"><%= t('maintenance_services.types.preventive_maintenance') %></option>
+                  <option value="Reparación"><%= t('maintenance_services.types.repair') %></option>
+                  <option value="Inspección"><%= t('maintenance_services.types.inspection') %></option>
+                  <option value="Cambio de Aceite"><%= t('maintenance_services.types.oil_change') %></option>
+                  <option value="Otro"><%= t('maintenance_services.types.other') %></option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label"><%= t('maintenance_services.filters.from_date') %></label>
+            <div class="control">
+              <input type="date" class="input"
+                     data-action="change->service-filter#filterByDate"
+                     data-service-filter-target="dateFrom">
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label"><%= t('maintenance_services.filters.to_date') %></label>
+            <div class="control">
+              <input type="date" class="input"
+                     data-action="change->service-filter#filterByDate"
+                     data-service-filter-target="dateTo">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if @maintenance_services.any? %>
+      <div class="table-container" data-controller="table-sort">
+        <table class="table is-fullwidth is-striped is-hoverable" data-table-sort-target="table">
+          <thead>
+            <tr>
+              <th data-sortable data-sort-type="date"><%= t('maintenance_services.fields.date') %></th>
+              <th data-sortable data-sort-type="string"><%= t('maintenance_services.fields.type') %></th>
+              <th data-sortable data-sort-type="string"><%= t('maintenance_services.fields.description') %></th>
+              <th data-sortable data-sort-type="number"><%= t('maintenance_services.fields.cost') %></th>
+              <th data-sortable data-sort-type="string"><%= t('maintenance_services.fields.status') %></th>
+              <th><%= t('maintenance_services.fields.actions') %></th>
+            </tr>
+          </thead>
+          <tbody data-service-filter-target="servicesList">
+            <% @maintenance_services.order(service_date: :desc).each do |service| %>
+              <tr data-service-type="<%= service.service_type %>"
+                  data-service-date="<%= service.service_date.iso8601 %>">
+                <td data-sort-value="<%= service.service_date.iso8601 %>">
+                  <time datetime="<%= service.service_date.iso8601 %>">
+                    <%= l(service.service_date, format: :default) %>
+                  </time>
+                </td>
+                <td>
+                  <span class="tag <%= service_type_color(service.service_type) %>">
+                    <%= translate_service_type(service.service_type) %>
+                  </span>
+                </td>
+                <td>
+                  <p class="is-size-7"><%= truncate(service.description, length: 80) %></p>
+                </td>
+                <td data-sort-value="<%= service.cost_cents ? service.cost_cents / 100.0 : 0 %>">
+                  <% if service.cost %>
+                    <span class="has-text-weight-semibold">
+                      $<%= number_with_delimiter(service.cost.to_i) %>
+                    </span>
+                  <% else %>
+                    <span class="has-text-grey"><%= t('maintenance_services.messages.not_specified') %></span>
+                  <% end %>
+                </td>
+                <td>
+                  <span class="tag <%= status_tag_color(service.status) %>">
+                    <%= t("maintenance_services.statuses.#{service.status}") %>
+                  </span>
+                </td>
+                <td>
+                  <div class="buttons are-small">
+                    <%= link_to t('buttons.view'), maintenance_service_path(service),
+                               class: "button is-small is-info" %>
+                    <%= link_to t('buttons.edit'), edit_maintenance_service_path(service),
+                               class: "button is-small is-warning" %>
+                    <%= link_to t('buttons.delete'), maintenance_service_path(service),
+                               data: {
+                                 turbo_method: :delete,
+                                 turbo_confirm: t('common.confirm_delete_service')
+                               },
+                               class: "button is-small is-danger" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="columns">
+        <div class="column">
+          <div class="card">
+            <div class="card-content has-text-centered">
+              <p class="title is-4"><%= @maintenance_services.count %></p>
+              <p class="subtitle"><%= t('maintenance_services.stats.total_services') %></p>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="card">
+            <div class="card-content has-text-centered">
+              <p class="title is-4">
+                $<%= number_with_delimiter(@maintenance_services.where.not(cost_cents: nil).sum(:cost_cents) / 100) %>
+              </p>
+              <p class="subtitle"><%= t('maintenance_services.stats.total_cost') %></p>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="card">
+            <div class="card-content has-text-centered">
+              <p class="title is-4">
+                <%= @maintenance_services.where(service_date: 1.year.ago..Date.current).count %>
+              </p>
+              <p class="subtitle"><%= t('maintenance_services.stats.this_year') %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="notification is-info">
+        <p class="has-text-centered">
+          <%= t('maintenance_services.messages.no_services') %>
+          <%= link_to t('maintenance_services.messages.register_first'),
+                     new_vehicle_maintenance_service_path(@vehicle),
+                     class: "has-text-weight-bold" %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+<% content_for :head do %>
+  <style>
+    .tag.is-preventive { background-color: #48c774; color: white; }
+    .tag.is-repair { background-color: #ff3860; color: white; }
+    .tag.is-inspection { background-color: #3273dc; color: white; }
+    .tag.is-oil-change { background-color: #ffdd57; color: rgba(0, 0, 0, 0.7); }
+    .tag.is-other { background-color: #dbdbdb; color: rgba(0, 0, 0, 0.7); }
+  </style>
+<% end %>

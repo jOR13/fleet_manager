@@ -1,0 +1,233 @@
+es:
+  activerecord:
+    errors:
+      messages:
+        record_invalid: "La validación falló: %{errors}"
+        taken: "ya está en uso"
+        blank: "no puede estar en blanco"
+        wrong_length: "debe tener exactamente %{count} caracteres"
+
+  app:
+    title: "Fleet Manager"
+    subtitle: "Sistema de Gestión de Vehículos"
+
+  nav:
+    vehicles: "Vehículos"
+    reports: "Reportes"
+    api_docs: "API Docs"
+    dark_mode: "Oscuro"
+    light_mode: "Claro"
+
+  reports:
+    title: "Reportes de Mantenimiento"
+    dashboard: "Dashboard"
+    summary: "Resumen de Mantenimiento"
+    filters:
+      date_range: "Rango de Fechas"
+      from_date: "Desde"
+      to_date: "Hasta"
+      apply_filters: "Aplicar Filtros"
+      clear_filters: "Limpiar"
+    totals:
+      total_services: "Total Servicios"
+      total_cost: "Costo Total"
+      average_cost: "Costo Promedio"
+    charts:
+      services_by_status: "Servicios por Estado"
+      services_by_type: "Servicios por Tipo"
+      cost_by_vehicle: "Costo por Vehículo"
+      monthly_trend: "Tendencia Mensual"
+    export:
+      csv: "Exportar CSV"
+      excel: "Exportar Excel"
+    tables:
+      vehicle: "Vehículo"
+      services_count: "Servicios"
+      total_cost: "Costo Total"
+      rank: "Posición"
+
+  vehicles:
+    title: "Gestión de Vehículos"
+    new: "Nuevo Vehículo"
+    edit: "Editar Vehículo"
+    show: "Ver Vehículo"
+    create: "Crear Vehículo"
+    update: "Actualizar Vehículo"
+    delete: "Eliminar"
+    confirm_delete: "¿Estás seguro?"
+
+    search_placeholder: "VIN, placa, marca o modelo..."
+    all_statuses: "Todos los estados"
+    all_brands: "Todas las marcas"
+
+    form:
+      vin: "VIN"
+      vin_placeholder: "17 caracteres únicos"
+      brand: "Marca"
+      brand_placeholder: "Ej: Toyota"
+      model: "Modelo"
+      model_placeholder: "Ej: Corolla"
+      year: "Año"
+      plate: "Placa"
+      plate_placeholder: "Ej: ABC-123"
+      mileage: "Kilometraje"
+      mileage_placeholder: "Kilometraje actual"
+      status: "Estado"
+
+    fields:
+      brand_model: "Marca/Modelo"
+      plate: "Placa"
+      vin: "VIN"
+      year: "Año"
+      mileage: "Kilometraje"
+      status: "Estado"
+      services: "Servicios"
+      actions: "Acciones"
+
+    statuses:
+      active: "Activo"
+      inactive: "Inactivo"
+      in_maintenance: "En Mantenimiento"
+
+    view:
+      cards: "Cards"
+      table: "Tabla"
+      view_label: "Vista"
+
+    messages:
+      no_vehicles: "No hay vehículos registrados aún."
+      register_first: "Registra el primer vehículo"
+
+  maintenance_services:
+    title: "Servicios de Mantenimiento"
+    new: "Nuevo Servicio"
+    edit: "Editar Servicio"
+    show: "Ver Servicio"
+    create: "Crear Servicio"
+    update: "Actualizar Servicio"
+
+    filters:
+      by_type: "Filtrar por tipo"
+      all_types: "Todos los tipos"
+      from_date: "Desde fecha"
+      to_date: "Hasta fecha"
+
+    form:
+      service_type: "Tipo de Servicio"
+      service_date: "Fecha del Servicio"
+      status: "Estado"
+      priority: "Prioridad"
+      status_help: "Cambia el estado a 'Completado' cuando termines el servicio"
+      priority_help: "Establece la prioridad según la urgencia del servicio"
+      description: "Descripción"
+      description_placeholder: "Describe el servicio realizado..."
+      description_help: "Proporciona detalles específicos del servicio o reparación"
+      cost: "Costo"
+      cost_placeholder: "0.00"
+      cost_help: "Costo del servicio (opcional)"
+      mileage_at_service: "Kilometraje"
+      mileage_placeholder: "0"
+      mileage_help: "Kilometraje al momento del servicio"
+
+    types:
+      preventive_maintenance: "Mantenimiento Preventivo"
+      repair: "Reparación"
+      inspection: "Inspección"
+      oil_change: "Cambio de Aceite"
+      other: "Otro"
+
+    priorities:
+      low: "Baja"
+      medium: "Media"
+      high: "Alta"
+
+    fields:
+      date: "Fecha"
+      type: "Tipo"
+      description: "Descripción"
+      cost: "Costo"
+      status: "Estado"
+      actions: "Acciones"
+
+    statuses:
+      pending: "Pendiente"
+      in_progress: "En Progreso"
+      completed: "Completado"
+
+    stats:
+      total_services: "Total Servicios"
+      total_cost: "Costo Total"
+      this_year: "Este Año"
+
+    messages:
+      no_services: "No hay servicios de mantenimiento registrados para este vehículo."
+      register_first: "Registrar el primer servicio"
+      not_specified: "No especificado"
+
+  buttons:
+    save: "Guardar"
+    cancel: "Cancelar"
+    edit: "Editar"
+    delete: "Eliminar"
+    view: "Ver"
+    back: "Volver"
+    view_all: "Ver Todos"
+
+  nav:
+    vehicles: "Vehículos"
+    reports: "Reportes"
+    api_docs: "API Docs"
+    dark_mode: "Oscuro"
+    light_mode: "Claro"
+    services: "Servicios"
+
+  common:
+    description: "Descripción"
+    additional_notes: "Notas Adicionales"
+    recent_services: "Servicios Recientes"
+    view_all_services: "Ver todos los servicios"
+    vehicle_information: "Información del Vehículo"
+    service_details: "Detalles del Servicio"
+    related_information: "Información Relacionada"
+    quick_actions: "Acciones Rápidas"
+    new_service: "Nuevo Servicio"
+    view_vehicle: "Ver Vehículo"
+    edit_maintenance_service: "Editar Servicio de Mantenimiento"
+    register_new_maintenance_service: "Registrar Nuevo Servicio de Mantenimiento"
+    plate: "Placa"
+    current_mileage: "Kilometraje actual"
+    no_mileage_recorded: "Sin kilometraje registrado"
+    confirm_delete_service: "¿Estás seguro de eliminar este servicio?"
+
+  messages:
+    created: "creado exitosamente"
+    updated: "actualizado exitosamente"
+    deleted: "eliminado exitosamente"
+
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      long: "%d de %B de %Y"
+
+  time:
+    formats:
+      default: "%d/%m/%Y %H:%M"
+
+  number:
+    currency:
+      format:
+        delimiter: ","
+        separator: "."
+        unit: "$"
+
+  messages:
+    success: "Operación exitosa"
+    error: "Error en la operación"
+    not_found: "No encontrado"
+    unauthorized: "No autorizado"
+    vehicle_created: "Vehículo creado exitosamente"
+    vehicle_updated: "Vehículo actualizado exitosamente"
+    vehicle_deleted: "Vehículo eliminado exitosamente"
+    service_created: "Servicio de mantenimiento creado exitosamente"
+    service_updated: "Servicio de mantenimiento actualizado exitosamente"
+    service_deleted: "Servicio de mantenimiento eliminado exitosamente"

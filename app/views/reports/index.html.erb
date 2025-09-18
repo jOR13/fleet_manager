@@ -1,0 +1,135 @@
+<% content_for :title, t('reports.title') %>
+
+<section class="section" data-controller="reports">
+  <div class="container">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <h1 class="title"><%= t('reports.title') %></h1>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <div class="buttons">
+            <%= link_to t('reports.export.csv'), export_reports_path(locale: I18n.locale, format: 'csv', from: params[:from], to: params[:to]),
+                       class: "button is-info is-outlined" %>
+            <%= link_to t('reports.export.excel'), export_reports_path(locale: I18n.locale, format: 'xlsx', from: params[:from], to: params[:to]),
+                       class: "button is-success is-outlined" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3 class="title is-5"><%= t('reports.filters.date_range') %></h3>
+      <%= form_with url: reports_path(locale: I18n.locale), method: :get, local: true, class: "form" do |form| %>
+        <div class="columns">
+          <div class="column">
+            <div class="field">
+              <label class="label"><%= t('reports.filters.from_date') %></label>
+              <div class="control">
+                <%= form.date_field :from, value: @from_date, class: "input" %>
+              </div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="field">
+              <label class="label"><%= t('reports.filters.to_date') %></label>
+              <div class="control">
+                <%= form.date_field :to, value: @to_date, class: "input" %>
+              </div>
+            </div>
+          </div>
+          <div class="column is-narrow">
+            <div class="field">
+              <label class="label">&nbsp;</label>
+              <div class="control">
+                <div class="buttons">
+                  <%= form.submit t('reports.filters.apply_filters'), class: "button is-primary" %>
+                  <%= link_to t('reports.filters.clear_filters'), reports_path(locale: I18n.locale), class: "button is-light" %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <%= render 'reports_content' %>
+  </div>
+</section>
+
+<% content_for :head do %>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const statusData = <%= raw @report[:by_status].to_json %>;
+      const statusLabels = statusData.map(item => {
+        const statusMap = {
+          'pending': '<%= t('maintenance_services.statuses.pending') %>',
+          'in_progress': '<%= t('maintenance_services.statuses.in_progress') %>',
+          'completed': '<%= t('maintenance_services.statuses.completed') %>'
+        };
+        return statusMap[item.status] || item.status;
+      });
+      const statusCounts = statusData.map(item => item.count);
+
+      new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+          labels: statusLabels,
+          datasets: [{
+            data: statusCounts,
+            backgroundColor: ['#ff3860', '#ffdd57', '#48c774']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+
+      const typeData = <%= raw @report[:by_service_type].to_json %>;
+      const typeLabels = typeData.map(item => {
+        const typeMap = {
+          'Mantenimiento Preventivo': '<%= t('maintenance_services.types.preventive_maintenance') %>',
+          'Reparación': '<%= t('maintenance_services.types.repair') %>',
+          'Inspección': '<%= t('maintenance_services.types.inspection') %>',
+          'Cambio de Aceite': '<%= t('maintenance_services.types.oil_change') %>',
+          'Otro': '<%= t('maintenance_services.types.other') %>'
+        };
+        return typeMap[item.service_type] || item.service_type;
+      });
+      const typeCounts = typeData.map(item => item.count);
+
+      new Chart(document.getElementById('typeChart'), {
+        type: 'bar',
+        data: {
+          labels: typeLabels,
+          datasets: [{
+            label: '<%= t('reports.totals.total_services') %>',
+            data: typeCounts,
+            backgroundColor: '#3273dc'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    });
+  </script>
+<% end %>

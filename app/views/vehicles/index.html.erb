@@ -1,0 +1,215 @@
+<% content_for :title, t('vehicles.title') %>
+
+<section class="section" data-controller="vehicle-filter view-toggle">
+  <div class="container">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <h1 class="title"><%= t('vehicles.title') %></h1>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <%= link_to t('vehicles.new'), new_vehicle_path, class: "button is-primary" %>
+        </div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label"><%= t('vehicles.search_placeholder').split(',').first %></label>
+            <div class="control has-icons-left">
+              <input class="input" type="text" placeholder="<%= t('vehicles.search_placeholder') %>"
+                     data-action="input->vehicle-filter#search"
+                     data-vehicle-filter-target="searchInput">
+              <span class="icon is-small is-left">
+                <i class="fas fa-search"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label"><%= t('vehicles.fields.status') %></label>
+            <div class="control">
+              <div class="select is-fullwidth">
+                <select data-action="change->vehicle-filter#filterByStatus"
+                        data-vehicle-filter-target="statusFilter">
+                  <option value=""><%= t('vehicles.all_statuses') %></option>
+                  <option value="active"><%= t('vehicles.statuses.active') %></option>
+                  <option value="inactive"><%= t('vehicles.statuses.inactive') %></option>
+                  <option value="in_maintenance"><%= t('vehicles.statuses.in_maintenance') %></option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label"><%= t('vehicles.form.brand') %></label>
+            <div class="control">
+              <div class="select is-fullwidth">
+                <select data-action="change->vehicle-filter#filterByBrand"
+                        data-vehicle-filter-target="brandFilter">
+                  <option value=""><%= t('vehicles.all_brands') %></option>
+                  <% Vehicle.distinct.pluck(:brand).compact.each do |brand| %>
+                    <option value="<%= brand %>"><%= brand %></option>
+                  <% end %>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column is-narrow">
+          <div class="field">
+            <label class="label"><%= t('vehicles.view.view_label') %></label>
+            <div class="control">
+              <div class="buttons has-addons">
+                <button class="button is-selected"
+                        data-action="click->view-toggle#showCards"
+                        data-view-toggle-target="cardsButton">
+                  <span class="icon">
+                    <i class="fas fa-th"></i>
+                  </span>
+                  <span><%= t('vehicles.view.cards') %></span>
+                </button>
+                <button class="button"
+                        data-action="click->view-toggle#showTable"
+                        data-view-toggle-target="tableButton">
+                  <span class="icon">
+                    <i class="fas fa-list"></i>
+                  </span>
+                  <span><%= t('vehicles.view.table') %></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if @vehicles.any? %>
+      <div class="columns is-multiline" data-view-toggle-target="cardsView" data-vehicle-filter-target="vehiclesList">
+        <% @vehicles.each do |vehicle| %>
+          <div class="column is-one-third" data-vehicle-brand="<%= vehicle.brand %>"
+               data-vehicle-status="<%= vehicle.status %>"
+               data-vehicle-search="<%= "#{vehicle.vin} #{vehicle.plate} #{vehicle.brand} #{vehicle.model}".downcase %>">
+            <div class="card">
+              <div class="card-content">
+                <div class="media">
+                  <div class="media-left">
+                    <figure class="image is-48x48">
+                      <span class="icon is-large has-text-primary">
+                        <i class="fas fa-car fa-2x"></i>
+                      </span>
+                    </figure>
+                  </div>
+                  <div class="media-content">
+                    <p class="title is-4"><%= vehicle.brand %> <%= vehicle.model %></p>
+                    <p class="subtitle is-6"><%= vehicle.plate %></p>
+                  </div>
+                </div>
+
+                <div class="content">
+                  <p><strong><%= t('vehicles.fields.vin') %>:</strong> <%= vehicle.vin %></p>
+                  <p><strong><%= t('vehicles.fields.year') %>:</strong> <%= vehicle.year %></p>
+                  <% if vehicle.mileage %>
+                    <p><strong><%= t('vehicles.fields.mileage') %>:</strong> <%= number_with_delimiter(vehicle.mileage) %> km</p>
+                  <% end %>
+
+                  <div class="tags">
+                    <span class="tag <%= status_tag_color(vehicle.status) %>">
+                      <%= t("vehicles.statuses.#{vehicle.status}") %>
+                    </span>
+                    <span class="tag is-info">
+                      <%= vehicle.maintenance_services.count %> <%= t('vehicles.fields.services').downcase %>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <footer class="card-footer">
+                <%= link_to t('buttons.view'), vehicle_path(vehicle), class: "card-footer-item" %>
+                <%= link_to t('buttons.edit'), edit_vehicle_path(vehicle), class: "card-footer-item" %>
+                <%= link_to t('buttons.delete'), vehicle_path(vehicle),
+                           data: {
+                             turbo_method: :delete,
+                             turbo_confirm: t('vehicles.confirm_delete')
+                           },
+                           class: "card-footer-item has-text-danger" %>
+              </footer>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="table-container is-hidden" data-view-toggle-target="tableView" data-controller="table-sort">
+        <table class="table is-fullwidth is-striped is-hoverable" data-table-sort-target="table">
+          <thead>
+            <tr>
+              <th data-sortable data-sort-type="string"><%= t('vehicles.fields.brand_model') %></th>
+              <th data-sortable data-sort-type="string"><%= t('vehicles.fields.plate') %></th>
+              <th data-sortable data-sort-type="string"><%= t('vehicles.fields.vin') %></th>
+              <th data-sortable data-sort-type="number"><%= t('vehicles.fields.year') %></th>
+              <th data-sortable data-sort-type="number"><%= t('vehicles.fields.mileage') %></th>
+              <th data-sortable data-sort-type="string"><%= t('vehicles.fields.status') %></th>
+              <th data-sortable data-sort-type="number"><%= t('vehicles.fields.services') %></th>
+              <th><%= t('vehicles.fields.actions') %></th>
+            </tr>
+          </thead>
+          <tbody data-vehicle-filter-target="vehiclesTableBody">
+            <% @vehicles.each do |vehicle| %>
+              <tr data-vehicle-brand="<%= vehicle.brand %>"
+                  data-vehicle-status="<%= vehicle.status %>"
+                  data-vehicle-search="<%= "#{vehicle.vin} #{vehicle.plate} #{vehicle.brand} #{vehicle.model}".downcase %>">
+                <td>
+                  <strong><%= vehicle.brand %> <%= vehicle.model %></strong>
+                </td>
+                <td><%= vehicle.plate %></td>
+                <td><code class="is-size-7"><%= vehicle.vin %></code></td>
+                <td data-sort-value="<%= vehicle.year %>"><%= vehicle.year %></td>
+                <td data-sort-value="<%= vehicle.mileage || 0 %>">
+                  <% if vehicle.mileage %>
+                    <%= number_with_delimiter(vehicle.mileage) %> km
+                  <% else %>
+                    <span class="has-text-grey"><%= t('maintenance_services.messages.not_specified') %></span>
+                  <% end %>
+                </td>
+                <td>
+                  <span class="tag <%= status_tag_color(vehicle.status) %>">
+                    <%= t("vehicles.statuses.#{vehicle.status}") %>
+                  </span>
+                </td>
+                <td data-sort-value="<%= vehicle.maintenance_services.count %>">
+                  <span class="tag is-info">
+                    <%= vehicle.maintenance_services.count %>
+                  </span>
+                </td>
+                <td>
+                  <div class="buttons are-small">
+                    <%= link_to t('buttons.view'), vehicle_path(vehicle), class: "button is-small is-info" %>
+                    <%= link_to t('buttons.edit'), edit_vehicle_path(vehicle), class: "button is-small is-warning" %>
+                    <%= link_to t('buttons.delete'), vehicle_path(vehicle),
+                               data: {
+                                 turbo_method: :delete,
+                                 turbo_confirm: t('vehicles.confirm_delete')
+                               },
+                               class: "button is-small is-danger" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="notification is-info">
+        <p class="has-text-centered">
+          <%= t('vehicles.messages.no_vehicles') %>
+          <%= link_to t('vehicles.messages.register_first'), new_vehicle_path, class: "has-text-weight-bold" %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+</section>
